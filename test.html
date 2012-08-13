@@ -1,0 +1,105 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title> Welcome to Leads Management</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="css/main.css" rel="stylesheet"  type="text/css">
+<link href="css/validationEngine.jquery.css" rel="stylesheet" type="text/css" media="screen"  />
+<script src="js/jquery.min.1.5.2.js" type="text/javascript"></script>
+<script src="js/jquery.validationEngine-en.js" type="text/javascript"></script>
+<script src="js/jquery.validationEngine.js" type="text/javascript"></script>
+<script type="text/javascript" src="dtree.js"></script>
+<script language="JavaScript"> 
+function logout()
+{
+	document.frm_logout.submit();
+}
+
+function check()
+{
+	if (document.frm_login.name.value.search(/\S/)==-1) {
+		alert('Please enter your Login name');
+		document.frm_login.name.focus();
+		return false;
+	}
+	if (document.frm_login.password.value.search(/\S/)==-1) {
+		alert('Please enter your password.');
+		document.frm_login.password.focus();
+		return false;
+	}
+	return true;
+}
+</script>
+</head>
+<body leftmargin="0" rightmargin="0" topmargin="0" bottommargin="0" bgcolor="#F1EFED">
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" bgcolor="#ffffff" style="border:1px solid #666666">
+	<tr>
+		<td bgcolor="#FFFFFF" colspan="2" align="center" height="30"  valign="middle">
+		
+			<table width="100%" align="center" border="0"  cellpadding="0" cellspacing="0">
+	<tr>
+    	<td align="center" colspan="3" valign="top" style="padding-top:0px; height:100px; background-color:#0EA3F1;">
+		</td>
+	</tr>
+	<tr bgcolor="#1A449B" > 
+		<td class="paratext1" width="20%"></td>
+		<td class="paratext1" width="60%"><span>Administrator Control Panel</span></td>
+		<td class="paratext_small" width="20%"><span></span></td>
+	</tr>
+</table>
+		</td>
+	</tr>
+	
+    <tr>
+		<td height="55" colspan="2" align="center" valign="top">
+			<form name="frm_login" action="/projects/leads_management/index.php" method="post" onSubmit="return check();">
+				<table>
+					<tr>
+                        <td height="150">&nbsp;</td>
+                    </tr>
+				</table>
+				<table width="45%" cellpadding="5" cellspacing="0" border="0" align="center" class="border">
+                    <tr>
+                        <td class="TDHEAD" colspan="3">Login</td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="3" style="color:#FF0000;"></td>
+                    </tr>
+                    <tr>
+                        <td>Login</td>
+                        <td>:</td>
+                        <td><input name="name" dir="name" type="text" value="" maxlength="15" class="inplogin" /></td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>:</td>
+                        <td><input name="password" id="password" type="password" value="" maxlength="12" class="inplogin" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">&nbsp;</td>
+                        <td><input type="submit" name="Login" value=" Login " class="inplogin"></td>
+                    </tr>
+				</table>
+		  <table>
+                    <tr>
+                        <td height="100">&nbsp;</td>
+                    </tr>
+                </table>
+             </form>
+		</td>
+  	</tr>
+	
+    <tr><td bgcolor="#FFFFFF"><img src="images/spacer.gif" width="1px" height="2px"></td></tr>
+    
+	<tr>
+    	<td colspan="2" align="center" height="15" bgcolor="#0EA3F1">
+        	<font color="#fffffF" size="1" face="Verdana">Copyright &copy; 2011 - 2012 www.senabi.com <br>Created By 
+        			<strong>www.senabisoft.com</strong></font>
+    </td>
+	</tr>
+</table>
+<form name="frm_logout"	action="index.php" method="post" style="padding:0;margin:0;">
+	<input name="mode" type="hidden" value="logout">
+</form>
+</body>
+</html>
+
