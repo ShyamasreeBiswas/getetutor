@@ -1,0 +1,16 @@
+ /* Run the project */
+
+1.Code runs in apache friends - xampp, an Apache distribution.go to http://www.apachefriends.org/en/xampp.html and download.
+ After installing xampp place your project foler inside httdocs inside xampp (where it's already installed). It should be like 
+http://localhost/project folder. It will automatically direct to your project index page.
+
+2.To set the database go to http://localhost/phpmyadmin in your browser.
+Create database there (e.g. here it's "getetutor") then select that database.
+Import db file which is a .sql file (here for our project go to prroject folder(getetutor) 
+and browse db file(getetutor.sql file) from DB File folder and upload it. 
+Database name should be same in phpmyadmin and in .sql file.
+Project won't display results untill connected to PHPMyAdmin. 
+
+3.Run
+
+ http://localhost/getetutor in your browser.
