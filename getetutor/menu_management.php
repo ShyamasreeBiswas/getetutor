@@ -37,6 +37,55 @@ else if($mode=='add' || $mode=='edit')
 	
 	disphtml("saveData(".$id.");");
 
+} else if($mode =='change_status') 
+{					  
+  	$menu->activeDeactive($id);
+  	$GLOBALS['admin_msg'] = $menu->errors;
+	disphtml("main();");
+} 
+else if($mode=="save") 
+{	
+	
+	//print_r($_POST); die;
+	foreach($_POST as $key=>$val) 
+	{
+		if($key!='mode' && $key!='submit')	
+		{
+			$menu->$key=$val;
+		}
+	}
+
+	if($id>0) 
+	{
+		if($menu->save($id)) 
+		{
+			$GLOBALS['admin_msg'] = "Menu updated successfully";
+			disphtml("main();");
+		} else {
+			$GLOBALS['admin_msg'] = $menu->admin_msg;
+		  	disphtml("saveData(".$id.");");
+		}
+	} 
+	else 
+	{
+		if($menu->save($id="NULL")) 
+		{
+			$GLOBALS['admin_msg'] = "Menu inserted successfully";
+			disphtml("main();");
+		} 
+		else 
+		{
+			$GLOBALS['admin_msg'] = $menu->errors;
+			$id=-1;
+		  	disphtml("saveData($id);");
+		}
+	}
+} 
+else if($mode=='delete' && isset($id)) 
+{
+	$menu->deleteData($id);
+	$GLOBALS['admin_msg'] = "Menu deleted successfully";
+	disphtml("main();");
 } 
 else 
 {
@@ -89,17 +138,76 @@ function main()
 ?>
 
 <script language="JavaScript">
+
+function show_all()
+{
+	document.frmSearch.search_mode.value = "";	
+	document.frmSearch.txt_search.value  = "";
+	document.frmSearch.search_type.value="";
+	document.frmSearch.submit();	
+}
+
+
+function search_text()
+{
+	if(document.frmSearch.search_type.value=="") {
+		alert("Please Select A Search Type");
+		document.frmSearch.search_type.focus();
+		return false;
+	}
+	if(document.frmSearch.txt_search.value.search(/\S/)==-1)
+	{
+		alert("Please Enter Search Criteria");
+		document.frmSearch.txt_search.focus();
+		return false;
+	}
+	document.frmSearch.search_mode.value = "SEARCH";
+	document.frmSearch.submit();
+}
+
+function OrderBy(order_type,field_name)
+{
+	document.frm_opts.fieldName.value=field_name;
+	document.frm_opts.orderType.value=order_type;
+	document.frm_opts.submit();
+}
+
+function ChangeStatus(ID,record_no)
+{
+	document.frm_opts.mode.value='change_status';
+	document.frm_opts.id.value=ID;
+	document.frm_opts.hold_page.value = record_no*1;
+	document.frm_opts.submit();
+}
+
 function addData()
 {
 	document.frm_opts.mode.value='add';
 	document.frm_opts.submit();
 }
 
-function editData(id)
+function viewData(id)
 {
-	document.frm_opts.mode.value='edit';
+	document.frm_opts.mode.value='view';
 	document.frm_opts.id.value=id;
 	document.frm_opts.submit();
+}
+
+function editData(id)
+{
+    document.frm_opts.mode.value='edit';
+	document.frm_opts.id.value=id;
+	document.frm_opts.submit();
+}
+
+function deleteData(id)
+{
+	var UserResp = window.confirm("Are you sure to remove this?");
+	if( UserResp == true ) {
+		document.frm_opts.mode.value='delete';
+		document.frm_opts.id.value=id;
+		document.frm_opts.submit();
+	}
 }
 
 </script>
@@ -123,7 +231,10 @@ function editData(id)
     <td width="22%" ><strong>Menu Id</strong></td>
 	<td width="30%" ><strong>Menu Name</strong></td>
     <td width="33%" ><strong>Menu Parent</strong></td>
+    <td width="10%" ><div align="center"><strong>Is Active</strong></div></td>
+    <td width="5%"  ><div align="center"><strong>View</strong></div></td>
     <td width="5%"  ><div align="center"><strong>Edit</strong></div></td>
+    <td width="5%"  ><div align="center"><strong>Delete</strong></div></td>
   </tr>
   <?php
 	$i=0;
@@ -146,7 +257,12 @@ function editData(id)
 		echo $parentmenu_name;
 	}
 	?> </td>
-    <td valign="top" align="center"><a href="javascript:editData( <?php echo $result[$i]['menu_id'];?>);" title="Edit Record Details"><img src="images/edit_icon.gif" border="0"></a></td>
+    <td valign="top" align="center"><a href="javascript:ChangeStatus(<?php echo $result[$i]['menu_id'];?>,<?php echo $GLOBALS['start']; ?>)" title="<?php echo ($result[$i]['is_active']=='Y')?'Turn off':'Turn on'; ?>"> 
+      <?php echo $result[$i]['is_active']=='N' ? "<font color=\"#FF0000\"><b>Inactive</b></font>" : "<font color=\"green\"><b>Active</b></font>"; ?> 
+      </a></td>
+    <td align="center" valign="top"><a href="javascript:viewData( <?php echo $result[$i]['menu_id'];?>);" title="View Menu Details"><img src="images/preview_icon.gif" border="0"></a></td>
+    <td align="center" valign="top"><a href="javascript:editData( <?php echo $result[$i]['menu_id'];?>);" title="Edit Menu Details"><img src="images/edit_icon.gif" border="0"></a></td>
+    <td align="center" valign="top"><a href="javascript:deleteData( <?php echo $result[$i]['menu_id'];?>);" title="Delete Menu Details"><img name="xx" src="images/delete_icon.gif" border="0"></a></td>
   </tr>
   <?php 
 	$i++;
@@ -184,7 +300,81 @@ function editData(id)
 		<input type="hidden" name="orderType" 	value="<?php echo $orderType;?>">
 	</form>
 <table><tr><td height="82px">&nbsp;</td></tr></table>
-<?php }
+<?php } ?>
+<?php
+function showData($id)
+{ 
+	$menu	= new menu();
+	if($id) 
+	{
+	  $menu->showData($id);
+	  
+	}
+?>
+<script language="JavaScript">
+function post_to_url(path, params, method) {
+    method = method || "post"; // Set method to post by default, if not specified.
+
+    // The rest of this code assumes you are not using a library.
+    // It can be made less wordy if you use one.
+    var form = document.createElement("form");
+    form.setAttribute("method", method);
+    form.setAttribute("action", path);
+
+    for(var key in params) {
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("name", key);
+        hiddenField.setAttribute("value", params[key]);
+
+        form.appendChild(hiddenField);
+    }
+
+    document.body.appendChild(form);    // Not entirely sure if this is necessary
+    form.submit();
+}
+</script>
+
+  <table width="98%" border="0" cellspacing="0" cellpadding="0" align="center" class="border">
+  <tr>
+    <td align="center">
+		<table width="100%" align="center" cellpadding="5" cellspacing="2">
+          <tr class="TDHEAD"> 
+            <td colspan="3" style="padding-left:10px;" class="text_main_header"> 
+             View Menu's Information</td>
+          </tr>
+          <tr> 
+            <td width="26%" align="right" valign="top" class="tbllogin">Menu Name</td>
+            <td width="3%" align="center" valign="top" class="tbllogin">:</td>
+            <td align="left" valign="top"><?php echo  stripslashes($menu->menu_name); ?>
+            </td>
+          </tr>
+          <tr> 
+          <td align="right" valign="top" class="tbllogin">Menu Parent Name </td>
+          <td align="center" valign="top" class="tbllogin">:</td>
+          <td  align="left" valign="top"><?php echo stripslashes($menu->menu_name);?></td>
+          </tr>
+          		  
+		  <tr> 
+            <td class="tbllogin" align="right" valign="top">Is Active</td>
+            <td align="center" valign="top" class="tbllogin">:</td>
+            <td valign="top">
+                <?php echo $menu->is_active=='N' ? 'In Active' : 'Active';?>
+            </td>
+          </tr>
+          <tr> 
+            <td height="32" >&nbsp;</td>
+            <td >&nbsp;</td>
+            <td class="point_txt"><input name="button" type="button" class="button" onClick="javascript:window.location='<?php echo $_SERVER['PHP_SELF'];?>';"  value="Back"> 
+            </td>
+          </tr>
+        </table>
+	</td>
+  </tr>
+</table>
+<table><tr><td height="170px">&nbsp;</td></tr></table>
+<?php 
+ } /////////////// End of function showData()
 
 function saveData($id)
 { 
@@ -197,7 +387,19 @@ function saveData($id)
 		$menu_value = $menu->menu_id;
 		$parent_value = $menu->parent_id;
 		
-		//echo $menu_value; die;
+		if($parent_value==0) {
+			
+			 echo "<script language=\"javascript\">
+			 	document.getElementById('div_main_menu').style.visibility = \"visible\";
+				document.getElementById('div_sub_menu').style.visibility = \"hidden\";
+			 </script>";
+		}else if($parent_value > 0) {
+			echo "<script language=\"javascript\">
+			 	document.getElementById('div_main_menu').style.visibility = \"visible\";
+				document.getElementById('div_sub_menu').style.visibility = \"hidden\";				
+			 </script>";
+		}
+		
 	}
 	else
 	{
@@ -210,9 +412,7 @@ function saveData($id)
 <script language="javascript">
 
 /*$(document).ready(function() {
-
-	$("#file_upload_form").validationEngine();
-
+div_main_menu
 });
 
 */
@@ -223,6 +423,7 @@ function view_main_menu_div()
 
 {
 
+	
 	$("#div_main_menu").show();
 
 	$("#div_sub_menu").hide();
@@ -230,27 +431,19 @@ function view_main_menu_div()
 }
 
 
-
 function view_sub_menu_div()
 
 {
-
 	$("#div_main_menu").hide();
 
 	$("#div_sub_menu").show();
 
 }
 
-
-
-
-
 </script>
-
  
+ <?php if($id<0) {?>
   <table width="98%" align="center" border="0" cellpadding="5" cellspacing="2"  class="border">
-
-
 
   <?php if($GLOBALS['msg']!=""){?>
 
@@ -274,13 +467,11 @@ function view_sub_menu_div()
 
     <td colspan="2">Select your option first</td>
 
-  </tr>
-
- 
+  </tr> 
 
     <tr onMouseOver="this.bgColor='<?php echo SCROLL_COLOR;?>'" onMouseOut="this.bgColor=''">
 
-        <td width="9%" align="center"><input type="radio" name="add_main_menu" id="main_menu" onclick="view_main_menu_div();"   /></td>
+        <td width="9%" align="center"><input type="radio" name="add_menu_option" id="main_menu" onclick="view_main_menu_div();" /></td>
 
         <td align="left">Add Main Menu</td>
 
@@ -292,22 +483,17 @@ function view_sub_menu_div()
 
     <tr onMouseOver="this.bgColor='<?php echo SCROLL_COLOR;?>'" onMouseOut="this.bgColor=''">
 
-        <td width="9%" align="center"><input type="radio" name="add_sub_menu" id="sub_menu" onclick="view_sub_menu_div();"  /></td>
+        <td width="9%" align="center"><input type="radio" name="add_menu_option" id="sub_menu" onclick="view_sub_menu_div();"  /></td>
 
         <td align="left">Add Sub Menu</td>
 
     </tr>
 
     <?php
-
 	}
-
 	else
-
 	{
-
 		$display ="block";
-
 	}
 
 	?>
@@ -315,7 +501,7 @@ function view_sub_menu_div()
 
 
 </table>
-
+<?php }?>
 <br />
 
 <div id="div_main_menu" style="display:<?php echo $display;?>;">
@@ -349,6 +535,18 @@ function view_sub_menu_div()
             <td align="right" valign="top" class="tbllogin"><font color="#FF0000">*</font>Menu Name</td>
             <td width="3%" align="center" valign="top" class="tbllogin">:</td>
             <td width="71%" align="left" valign="top"><input type="text" name="menu_name" id="menu_name" class="validate[required,custom[integer]] inplogin" value="<?php echo stripslashes($menu->menu_name);?>">
+            </td>
+          </tr>
+          
+          <tr> 
+            <td align="right" valign="top" class="tbllogin"><font color="#FF0000">*</font>Visible to</td>
+            <td width="3%" align="center" valign="top" class="tbllogin">:</td>
+            <td width="71%" align="left" valign="top"><select name="sub_admin">
+            	<option value="0" <?php if($menu->sub_admin=='0') { ?> selected="selected" <?php }?>>Only Admin</option>
+                <option value="0,1" <?php if($menu->sub_admin=='0,1') { ?> selected="selected" <?php }?>>Only Tutor</option>
+                <option value="0,2" <?php if($menu->sub_admin=='0,2') { ?> selected="selected" <?php }?>>Only Student</option>
+                <option value="0,1,2" <?php if($menu->sub_admin=='0,1,2') { ?> selected="selected" <?php }?>>Tutor & Student both</option>
+            </select>
             </td>
           </tr>
 		   
@@ -401,7 +599,19 @@ function view_sub_menu_div()
             <td width="71%" align="left" valign="top"><input type="text" name="menu_name" id="menu_name" class="validate[required,custom[integer]] inplogin" value="<?php echo stripslashes($menu->menu_name);?>">
             </td>
           </tr>
-		   
+		  
+          <tr> 
+            <td align="right" valign="top" class="tbllogin"><font color="#FF0000">*</font>Visible to</td>
+            <td width="3%" align="center" valign="top" class="tbllogin">:</td>
+            <td width="71%" align="left" valign="top"><select name="sub_admin">
+            	<option value="0" <?php if($menu->sub_admin=='0') { ?> selected="selected" <?php }?>>Only Admin</option>
+                <option value="0,1" <?php if($menu->sub_admin=='0,1') { ?> selected="selected" <?php }?>>Only Tutor</option>
+                <option value="0,2" <?php if($menu->sub_admin=='0,2') { ?> selected="selected" <?php }?>>Only Student</option>
+                <option value="0,1,2" <?php if($menu->sub_admin=='0,1,2') { ?> selected="selected" <?php }?>>Tutor & Student both</option>
+            </select>
+            </td>
+          </tr>
+           
           <tr> 
             <td class="tbllogin" align="right" valign="top"><font color="#FF0000">*</font>Parent</td>
             <td align="center" valign="top" class="tbllogin">:</td>

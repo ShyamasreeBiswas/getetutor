@@ -579,6 +579,7 @@ function dispDates($name,$selected){
 
 function leftMenu()
 {
+	
 ?>
 <script type="text/javascript">
 		d = new dTree('d');
@@ -588,9 +589,12 @@ function leftMenu()
 		$where = " ";
 		if($_SESSION['type']=='SUB') 
 		{
-			$menu = database::runQuery("select * from menu where parent_id='0' and is_active='Y' and sub_admin = '1' order by menu_name");
+			$menu = database::runQuery("select * from menu where parent_id='0' and is_active='Y' and (sub_admin = '0,1' || sub_admin = '0,1,2') order by menu_name");
 		} 
-		else 
+		else if($_SESSION['type']=='SUBS') 
+		{
+			$menu = database::runQuery("select * from menu where parent_id='0' and is_active='Y' and (sub_admin = '0,2' || sub_admin = '0,1,2') order by menu_name");
+		} else
 		{
 			$menu = database::runQuery("select * from menu where parent_id='0' and is_active='Y' order by menu_name");
 		}
@@ -598,17 +602,15 @@ function leftMenu()
 		while($menu[$i]!=NULL)
 		{
 		
-		?>
+		?> 
 			d.add(<?=$menu[$i]['menu_id'];?>,<?=$menu[$i]['parent_id']?>,'<B>&nbsp;<?=$menu[$i]['menu_name']?></B>');
 		<?
 		if($_SESSION['type']=='SUB')
 		{
-			if($menu[$i]['menu_id'] == 7 && $_SESSION['can_upload']=='N')
-			{
-				$where .= "and menu_id!= 10";
-			}
-
-			$sub_menu=database::runQuery("select * from menu where parent_id='".$menu[$i]['menu_id']."' and is_active='Y' ".$where."  order by menu_name");
+			$sub_menu=database::runQuery("select * from menu where parent_id='".$menu[$i]['menu_id']."' and is_active='Y' and (sub_admin = '0,1' || sub_admin = '0,1,2') ".$where."  order by menu_name");
+		} else if($_SESSION['type']=='SUBS')
+		{
+			$sub_menu=database::runQuery("select * from menu where parent_id='".$menu[$i]['menu_id']."' and is_active='Y' and (sub_admin = '0,2' || sub_admin = '0,1,2') ".$where."  order by menu_name");
 		} 
 		else 
 		{

@@ -59,6 +59,68 @@ class menu {
 				}
 	}
 	
+	function save($id)
+	{
+		$this->id=$id;
+		if ($this->id>0) {
+		
+			$str = "	menu_name  			= '" . $this->menu_name . "',
+						parent_id  			= '" . $this->parent_id . "',
+						page_name  			= '" . $this->page_name . "',
+						display_order  		= '" . $this->display_order . "',
+						sub_admin  			= '" . $this->sub_admin . "'
+					";
+		
+			if(database::updateQuery($this->table_name,$str,'menu_id',$this->id) ) {
+				$this->admin_msg = "Update Successful";
+				return true;
+			} else {
+				$this->admin_msg = "Update Failed";
+				return false;
+			}
+			$this->closeClientConn();
+		} 
+		else
+		{
+				$str = "	menu_name  			= '" . $this->menu_name . "',
+							parent_id  			= '" . $this->parent_id . "',
+							page_name  			= '" . $this->page_name . "',
+							display_order  		= '" . $this->display_order . "',
+							sub_admin  			= '" . $this->sub_admin . "'
+						";
+							
+				if(database::insertQuery($this->table_name,$str)) {
+					$this->admin_msg = "Insert Successful";
+					return true;
+				} else {
+					$this->admin_msg = "Insert Failed";
+					return false;
+				}
+			 
+		}
+	}
+  
+	function deleteData($id) 
+	{
+		if(database::deleteQuery($this->table_name,'menu_id',$id)) {
+			$this->admin_msg = "Delete Successful";
+			return true;
+ 	    } else {
+			$this->admin_msg = "Delete Failed";
+		  	return false;
+		}
+	}
+   	
+		
+	function activeDeactive($id)
+   	{
+		$this->id = $id; 
+	 	if(database::statusChange('is_active',$this->table_name,'menu_id',$this->id)) {
+			$this->admin_msg = "Status has been changed successfully";	
+	 	} else {
+		 	$this->errors="Status has been changed not successfully";
+		}
+    }
 	
 	function menuListOption($menu_value) 
 	{
@@ -92,7 +154,7 @@ class menu {
 		$result=self::search($sqlquery);
 		$i=0;
 		
-		$option_others = "<select name = 'parent' menu_id = 'menu'>";
+		$option_others = "<select name = 'parent_id' menu_id = 'menu'>";
 	
 		while($result[$i]!=NULL)
 		{

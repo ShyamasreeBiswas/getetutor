@@ -1,7 +1,7 @@
 <?php
 require_once(PATH_TO_CLASS."class.database.php");
 class userlogin {
-	var $id, $username, $password, $new_pwd, $type, $is_active, $can_upload, $can_download, $db_add_date;
+	var $id, $username, $password, $new_pwd, $type, $is_active, $db_add_date;
 	var $errors='';
 
 	function userlogin()
@@ -23,8 +23,6 @@ class userlogin {
 			Session::set_var('username', $this->username);
 			Session::set_var('id', $this->id);
 			Session::set_var('type', $this->type);
-			Session::set_var('can_upload', $this->can_upload);
-			Session::set_var('can_download', $this->can_download);
 			Session::set_var('ip_address', $_SERVER['REMOTE_ADDR']);
 			return true;
 		} 
@@ -89,8 +87,6 @@ class userlogin {
 				$this->username = $validationData['username'];
 				$this->id = $validationData['id'];
 				$this->type = $validationData['type'];
-				$this->can_upload = $validationData['can_upload'];
-				$this->can_download = $validationData['can_download'];
 				return true;
 			}
 			else
